@@ -4,15 +4,11 @@ import { FeaturesSectionDemo2 } from '../components/Aceternity/Components/ui/Ben
 import CoverDemo from "../components/Aceternity/Components/ui/coverDemo"
 import Spline from '@splinetool/react-spline'
 import TextGenerateEffectDemo from "../components/Aceternity/Components/ui/ttext-generate-effect"
-import FadeInComponent from './fadeInComponent'; // Import the new component
 
-export default function intro() {
+export default function Intro() {
   return (
     <>
-    <FadeInComponent>
-        <BackgroundLinesDemo />
-      </FadeInComponent>
-
+      <BackgroundLinesDemo />
       <div className="flex h-full ml-8">
         <div className="flex-1 flex items-center justify-center">
           <TextGenerateEffectDemo />
@@ -23,17 +19,9 @@ export default function intro() {
           </section>
         </div>
       </div>
-      
-      <FadeInComponent>
-        <FeaturesSectionDemo />
-        </FadeInComponent>
-      <FadeInComponent>
-        <FeaturesSectionDemo2 />
-      </FadeInComponent>
-
-      <FadeInComponent>
-        <CoverDemo />
-      </FadeInComponent>
+      <FeaturesSectionDemo />
+      <FeaturesSectionDemo2 />
+      <CoverDemo />
     </>
   )
 }

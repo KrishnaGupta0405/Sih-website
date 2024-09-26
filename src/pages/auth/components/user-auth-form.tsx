@@ -17,7 +17,7 @@ import { Button } from '@/components/custom/button'
 import { PasswordInput } from '@/components/custom/password-input'
 import { cn } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
-import { signInWithPopup, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth'
 import { auth, provider } from './firebase/firebase.tsx'
 
 const formSchema = z.object({
@@ -51,37 +51,6 @@ export function UserAuthForm({ className, setError, ...props }: UserAuthFormProp
     },
   })
 
-  // const handleSignIn = async (email: string, password: string) => {
-  //   setIsLoading(true);
-  //   try {
-  //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  //     const user = userCredential.user;
-  
-  //     // Check if the email is verified
-  //     if (user.emailVerified) {
-  //       setError({ message: 'Sign-in successful', variant: 'default' });
-  //       navigate('/dashboard');
-  //     } else {
-  //       // If the email is not verified, sign the user out and show an error message
-  //       await signOut(auth);
-  //       setError({ message: 'Please verify your email before signing in.', variant: 'destructive' });
-  //     }
-  //   } catch (err: any) {
-  //     // Firebase error code handling
-  //     if (err.code === 'auth/wrong-password') {
-  //       setError({ message: 'Incorrect password. Please try again.', variant: 'destructive' });
-  //     } else if (err.code === 'auth/user-not-found') {
-  //       setError({ message: 'No account found with this email.', variant: 'destructive' });
-  //     } else if (err.code === 'auth/invalid-email') {
-  //       setError({ message: 'Invalid email address. Please check and try again.', variant: 'destructive' });
-  //     } else {
-  //       setError({ message: (err as Error).message, variant: 'destructive' });
-  //     }
-  //     console.log(err); // Log the error for debugging
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const handleSignIn = async (email: string, password: string) => {
     setIsLoading(true); // Start loading state
     try {
@@ -91,8 +60,18 @@ export function UserAuthForm({ className, setError, ...props }: UserAuthFormProp
   
       if (user.emailVerified) {
         console.log('Sign-in successful', user);
-        navigate('/dashboard'); 
+
+         // Get the ID token
+        const idToken = await user.getIdToken(/* forceRefresh */ true);
+
+        // You can store the token or pass it to a parent component
+        // For example, save it in localStorage or send it to your backend
+        console.log("ID Token:", idToken);
+        localStorage.setItem('idToken', idToken);
+
+        navigate('/'); 
       } else {
+        setIsLoading(false);
         setError({ message: 'Please verify your email before signing in.', variant: 'destructive' });
         console.log('Email not verified');
       }
@@ -112,16 +91,12 @@ export function UserAuthForm({ className, setError, ...props }: UserAuthFormProp
       }, 3000); // 3000 milliseconds = 3 seconds
     }
   };
-  
-  
-  
-  
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
       await signInWithPopup(auth, provider);
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       console.error('Error signing in with Google:', error);
       setError({ message: 'Error signing in with Google.', variant: 'destructive' });

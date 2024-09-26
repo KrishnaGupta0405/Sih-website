@@ -10,9 +10,25 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { getAuth, signOut } from 'firebase/auth'
 
 export function UserNav() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      // Remove idToken from localStorage
+      localStorage.removeItem('idToken');
+      // Redirect to login page or home page
+      navigate('/intro');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,8 +65,8 @@ export function UserNav() {
           <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Link to="/">Log out</Link>
+        <DropdownMenuItem onClick={handleLogout}>
+          Log out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
