@@ -8,9 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/custom/button';
 import { PasswordInput } from '@/components/custom/password-input';
 import { cn } from '@/lib/utils';
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup } from 'firebase/auth';
-import { auth, provider } from './firebase/firebase.tsx';
 import { IconBrandGithub } from '@tabler/icons-react';
+import { handleSignUp, handleGoogleSignIn } from './firebase/firebase.tsx';
 
 interface SignUpFormProps extends HTMLAttributes<HTMLDivElement> {
   setError: (error: { title: string; message: string; variant: 'default' | 'destructive' } | null) => void; // Updated type here
@@ -51,43 +50,73 @@ export function SignUpForm({ className, setError, startProgress, ...props }: Sig
 
   const { handleSubmit, control } = form;
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      setError({ title: 'Error', message: 'Failed to sign in with Google.', variant: 'destructive' });
-    }
-  };
-
-  const handleSignUp = async (data: z.infer<typeof formSchema>) => {
+  const signInWithGoogle = async () => {
     setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      const user = userCredential.user;
-
-      await sendEmailVerification(user);
-
+      const result = await handleGoogleSignIn();
+      if (result.error) {
+        setError({
+          title: 'Error',
+          message: result.error || 'An unexpected error occurred.',
+          variant: 'destructive',
+        });
+      } else if (result.newUser) {
+        console.log("This is a new user!");
+        navigate('/'); // Navigate to the home page or dashboard
+      } else {
+        console.log("This user already exists.");
+        navigate('/'); // Navigate to the home page or dashboard
+      }
+    } catch (error: any) {
       setError({
-        title: 'Success',
-        message: 'Sign-up successful! A verification email has been sent to your inbox.',
-        variant: 'default',
+        title: 'Error',
+        message: error.message || 'An unexpected error occurred.',
+        variant: 'destructive',
       });
-
-      await startProgress();
-      setTimeout(() => navigate('/sign-in'), 1500);
-    } catch (err) {
-      console.error('Error signing up:', err);
-      setError({ title: 'Error', message: (err as Error).message, variant: 'destructive' });
+      console.error("Unexpected error during Google sign-in:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const signUp = async (data: any) => {
+    setIsLoading(true); // Start loading state
+    try {
+      const result = await handleSignUp(data.email, data.password); // Await the signup function
+
+      if (result.success) {
+        // Trigger success message and start progress bar
+        await startProgress(); // Make sure this is defined elsewhere in your code
+        setError({
+          title: 'Success',
+          message: result.success, // Use the success message from the result
+          variant: 'default',
+        });
+        setTimeout(() => navigate('/sign-in'), 1500); // Navigate after a delay
+      } else if (result.error) {
+        // Handle error case
+        setError({
+          title: 'Error',
+          message: result.error,
+          variant: 'destructive',
+        });
+      }
+    } catch (error: any) {
+      // Handle unexpected errors
+      setError({
+        title: 'Error',
+        message: error.message || 'An unexpected error occurred.',
+        variant: 'destructive',
+      });
+      console.error('Error signing up:', error);
+    } finally {
+      setIsLoading(false); // Reset loading state
+    }
+  };
+
   function onSubmit(data: z.infer<typeof formSchema>) {
     setError(null); // Clear any previous error
-    handleSignUp(data);
+    signUp(data);
   }
 
   return (
@@ -157,7 +186,7 @@ export function SignUpForm({ className, setError, startProgress, ...props }: Sig
 
             <div className='flex items-center gap-2'>
               <Button
-                onClick={handleGoogleSignIn}
+                onClick={signInWithGoogle}
                 variant='outline'
                 className='w-full'
                 type='button'

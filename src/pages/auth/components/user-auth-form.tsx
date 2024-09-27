@@ -17,8 +17,8 @@ import { Button } from '@/components/custom/button'
 import { PasswordInput } from '@/components/custom/password-input'
 import { cn } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
-import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth'
 import { auth, provider } from './firebase/firebase.tsx'
+import { handleSignIn, handleGoogleSignIn } from './firebase/firebase.tsx';
 
 const formSchema = z.object({
   email: z
@@ -51,63 +51,57 @@ export function UserAuthForm({ className, setError, ...props }: UserAuthFormProp
     },
   })
 
-  const handleSignIn = async (email: string, password: string) => {
-    setIsLoading(true); // Start loading state
-    try {
-      // Attempt to sign in the user with email and password
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-  
-      if (user.emailVerified) {
-        console.log('Sign-in successful', user);
+const signIn = async (email: string, password: string) => {
+  setIsLoading(true);
+  try {
+    const result = await handleSignIn(email, password);
 
-         // Get the ID token
-        const idToken = await user.getIdToken(/* forceRefresh */ true);
-
-        // You can store the token or pass it to a parent component
-        // For example, save it in localStorage or send it to your backend
-        console.log("ID Token:", idToken);
-        localStorage.setItem('idToken', idToken);
-
-        navigate('/'); 
-      } else {
-        setIsLoading(false);
-        setError({ message: 'Please verify your email before signing in.', variant: 'destructive' });
-        console.log('Email not verified');
-      }
-    } catch (err: any) {
-      if (err.code === 'auth/invalid-credential') {
-        setError({ message: 'Incorrect credentials', variant: 'destructive' });
-      } else {
-        setError({ message: (err as Error).message, variant: 'destructive' });
-      }
-      console.log('Error signing in:', err); // Log the error for debugging
-    } finally {
-      setIsLoading(false); // End loading state
-      
-      // Clear the error after 3 seconds
-      setTimeout(() => {
-        setError(null);
-      }, 3000); // 3000 milliseconds = 3 seconds
+    if (result.error) {
+      // Handle the error if there is one
+      setError({ message: result.error, variant: 'destructive' });
+      // console.error("Error signing in:", result.error);
+    } else if (result.newUser) {
+      console.log("This is a new user!");
+      navigate("/"); // Navigate to the home page or dashboard
+    } else {
+      console.log("This user already exists.");
+      navigate("/"); // Navigate to the home page or dashboard
     }
-  };
+  } catch (err: any) {
+    setError({ message: err.message, variant: 'destructive' });
+  } finally {
+    setIsLoading(false);
+    setTimeout(() => {
+            setError(null);
+          }, 3000); // 3000 milliseconds = 3 seconds
+  }
+};
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    try {
-      await signInWithPopup(auth, provider);
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      setError({ message: 'Error signing in with Google.', variant: 'destructive' });
-    } finally {
-      setIsLoading(false);
+const signInWithGoogle = async () => {
+  setIsLoading(true);
+  try {
+    const result = await handleGoogleSignIn();
+    if (result.error) {
+      setError({ message: result.error, variant: 'destructive' });
+    } else if (result.newUser) {
+      console.log("This is a new user!");
+      navigate('/'); // Navigate to the home page or dashboard
+    } else {
+      console.log("This user already exists.");
+      navigate('/'); // Navigate to the home page or dashboard
     }
-  };
+  } catch (error: any) {
+    setError({ message: error.message, variant: 'destructive' });
+    console.error("Unexpected error during Google sign-in:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    handleSignIn(data.email, data.password);
+    // setIsLoading(true);
+    signIn(data.email, data.password);
   }
 
   return (
@@ -166,7 +160,7 @@ export function UserAuthForm({ className, setError, ...props }: UserAuthFormProp
 
             <div className='flex items-center gap-2'>
               <Button
-                onClick={handleGoogleSignIn}
+                onClick={signInWithGoogle}
                 variant='outline'
                 className='w-full'
                 type='button'
@@ -175,6 +169,17 @@ export function UserAuthForm({ className, setError, ...props }: UserAuthFormProp
               >
                 Google
               </Button>
+            </div>
+            <div className='relative my-2'>
+              <div className='absolute inset-0 flex items-center'>
+                <span className='w-full border-t' />
+              </div>
+              <div className='relative flex justify-center text-xs uppercase'>
+                <span className='bg-background px-2 text-muted-foreground'>
+                  New to DopeScape ? {' '}
+                  <Link to='/sign-up' className='underline underline-offset-4 hover:text-primary' > &nbsp;Sign Up </Link>
+                </span>
+              </div>
             </div>
           </div>
         </form>

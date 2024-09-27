@@ -11,7 +11,8 @@ export default function BackgroundLinesDemo() {
         <div style={{padding : "0px 10px"}}>
         <ThemeSwitch /> {/* Adds space between ThemeSwitch and Button */}
         </div>
-        <Button><Link to="/sign-in">Sign In </Link></Button>
+        <Button style={{margin : "0px 10px 0px 10px"  }}><Link to="/sign-in">Sign In </Link></Button>
+        <Button><Link to="/sign-up">Sign Up </Link></Button>
       </div>
 
     <BackgroundLines className="flex items-center justify-center w-full flex-col px-4 -mt-14 pb-20">
