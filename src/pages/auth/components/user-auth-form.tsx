@@ -17,7 +17,6 @@ import { Button } from '@/components/custom/button'
 import { PasswordInput } from '@/components/custom/password-input'
 import { cn } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
-import { auth, provider } from './firebase/firebase.tsx'
 import { handleSignIn, handleGoogleSignIn } from './firebase/firebase.tsx';
 
 const formSchema = z.object({

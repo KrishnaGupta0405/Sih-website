@@ -1,67 +1,52 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useEffect, useState } from 'react';
+import { fetchTopPlayers } from '../../auth/components/firebase/firebase'; // Ensure the correct path to firebaseconfig
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+// Define the type for leaderboard entries
+interface LeaderboardEntry {
+  displayName: string;
+  overallScore: number;
+  email?: string;
+}
 
 export function RecentSales() {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch leaderboard data with real-time updates
+  useEffect(() => {
+    setLoading(true);
+    
+    // Set up the real-time listener for leaderboard changes
+    const unsubscribe = fetchTopPlayers((players) => {
+      setLeaderboard(players);
+      setLoading(false);
+    }) || (() => {}); // Default to a no-op function if undefined
+
+    // Unsubscribe from the listener when component unmounts
+    return () => unsubscribe();
+
+  }, []);
+
+  if (loading) {
+    return <p>Fetching...</p>; // Show a loading state while fetching data
+  }
+
   return (
     <div className='space-y-8'>
-      <div className='flex items-center'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/01.png' alt='Avatar' />
-          <AvatarFallback>OM</AvatarFallback>
-        </Avatar>
-        <div className='ml-4 space-y-1'>
-          <p className='text-sm font-medium leading-none'>Olivia Martin</p>
-          <p className='text-sm text-muted-foreground'>
-            olivia.martin@email.com
-          </p>
+      {leaderboard.map((player, index) => (
+        <div key={index} className='flex items-center'>
+          <Avatar className='h-9 w-9'>
+            <AvatarImage src={`/avatars/0${index + 1}.png`} alt={player.displayName} />
+            <AvatarFallback>{index + 1}</AvatarFallback>
+          </Avatar>
+          <div className='ml-4 space-y-1'>
+            <p className='text-sm font-medium leading-none'>{player.displayName}</p>
+            <p className='text-sm text-muted-foreground'>{player.email || 'N/A'}</p>
+          </div>
+          <div className='ml-auto font-medium'>↑ {player.overallScore} score</div>
         </div>
-        <div className='ml-auto font-medium'>+$1,999.00</div>
-      </div>
-      <div className='flex items-center'>
-        <Avatar className='flex h-9 w-9 items-center justify-center space-y-0 border'>
-          <AvatarImage src='/avatars/02.png' alt='Avatar' />
-          <AvatarFallback>JL</AvatarFallback>
-        </Avatar>
-        <div className='ml-4 space-y-1'>
-          <p className='text-sm font-medium leading-none'>Jackson Lee</p>
-          <p className='text-sm text-muted-foreground'>jackson.lee@email.com</p>
-        </div>
-        <div className='ml-auto font-medium'>+$39.00</div>
-      </div>
-      <div className='flex items-center'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/03.png' alt='Avatar' />
-          <AvatarFallback>IN</AvatarFallback>
-        </Avatar>
-        <div className='ml-4 space-y-1'>
-          <p className='text-sm font-medium leading-none'>Isabella Nguyen</p>
-          <p className='text-sm text-muted-foreground'>
-            isabella.nguyen@email.com
-          </p>
-        </div>
-        <div className='ml-auto font-medium'>+$299.00</div>
-      </div>
-      <div className='flex items-center'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/04.png' alt='Avatar' />
-          <AvatarFallback>WK</AvatarFallback>
-        </Avatar>
-        <div className='ml-4 space-y-1'>
-          <p className='text-sm font-medium leading-none'>William Kim</p>
-          <p className='text-sm text-muted-foreground'>will@email.com</p>
-        </div>
-        <div className='ml-auto font-medium'>+$99.00</div>
-      </div>
-      <div className='flex items-center'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/05.png' alt='Avatar' />
-          <AvatarFallback>SD</AvatarFallback>
-        </Avatar>
-        <div className='ml-4 space-y-1'>
-          <p className='text-sm font-medium leading-none'>Sofia Davis</p>
-          <p className='text-sm text-muted-foreground'>sofia.davis@email.com</p>
-        </div>
-        <div className='ml-auto font-medium'>+$39.00</div>
-      </div>
+      ))}
     </div>
-  )
+  );
 }

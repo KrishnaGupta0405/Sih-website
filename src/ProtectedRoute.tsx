@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component }) => {
-  return localStorage.getItem('idToken') ? <Component /> : <Navigate to="/intro" />;
+  return localStorage.getItem('userID') ? <Component /> : <Navigate to="/intro" />;
 };
 
 export default ProtectedRoute;

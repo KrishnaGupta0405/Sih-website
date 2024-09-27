@@ -9,7 +9,7 @@ import { Button } from '@/components/custom/button';
 import { PasswordInput } from '@/components/custom/password-input';
 import { cn } from '@/lib/utils';
 import { IconBrandGithub } from '@tabler/icons-react';
-import { handleSignUp, handleGoogleSignIn } from './firebase/firebase.tsx';
+import { handleSignUp, handleGoogleSignUp } from './firebase/firebase.tsx';
 
 interface SignUpFormProps extends HTMLAttributes<HTMLDivElement> {
   setError: (error: { title: string; message: string; variant: 'default' | 'destructive' } | null) => void; // Updated type here
@@ -50,10 +50,10 @@ export function SignUpForm({ className, setError, startProgress, ...props }: Sig
 
   const { handleSubmit, control } = form;
 
-  const signInWithGoogle = async () => {
+  const signUpWithGoogle = async () => {
     setIsLoading(true);
     try {
-      const result = await handleGoogleSignIn();
+      const result = await handleGoogleSignUp();
       if (result.error) {
         setError({
           title: 'Error',
@@ -186,7 +186,7 @@ export function SignUpForm({ className, setError, startProgress, ...props }: Sig
 
             <div className='flex items-center gap-2'>
               <Button
-                onClick={signInWithGoogle}
+                onClick={signUpWithGoogle}
                 variant='outline'
                 className='w-full'
                 type='button'
