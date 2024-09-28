@@ -30,6 +30,8 @@ const formSchema = z.object({
     .regex(/[0-9]/, { message: 'Password must contain at least one digit' })
     .regex(/[\W_]/, { message: 'Password must contain at least one special character' }),
   confirmPassword: z.string(),
+  name: z.string(),
+
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match.",
   path: ['confirmPassword'],
@@ -42,6 +44,7 @@ export function SignUpForm({ className, setError, startProgress, ...props }: Sig
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -50,48 +53,46 @@ export function SignUpForm({ className, setError, startProgress, ...props }: Sig
 
   const { handleSubmit, control } = form;
 
-  const signUpWithGoogle = async () => {
-    setIsLoading(true);
-    try {
-      const result = await handleGoogleSignUp();
-      if (result.error) {
-        setError({
-          title: 'Error',
-          message: result.error || 'An unexpected error occurred.',
-          variant: 'destructive',
-        });
-      } else if (result.newUser) {
-        console.log("This is a new user!");
-        navigate('/'); // Navigate to the home page or dashboard
-      } else {
-        console.log("This user already exists.");
-        navigate('/'); // Navigate to the home page or dashboard
-      }
-    } catch (error: any) {
+ // Calling function in the main component
+const signUpWithGoogle = async () => {
+  setIsLoading(true);
+  try {
+    const result = await handleGoogleSignUp();
+    
+    if (result.error) {
       setError({
         title: 'Error',
-        message: error.message || 'An unexpected error occurred.',
+        message: result.error || 'An unexpected error occurred.',
         variant: 'destructive',
       });
-      console.error("Unexpected error during Google sign-in:", error);
-    } finally {
-      setIsLoading(false);
+    } else {
+      navigate('/'); // Navigate to the home page or dashboard
     }
-  };
+  } catch (error: any) {
+    setError({
+      title: 'Error',
+      message: error.message || 'An unexpected error occurred.',
+      variant: 'destructive',
+    });
+    console.error("Unexpected error during Google sign-in:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const signUp = async (data: any) => {
     setIsLoading(true); // Start loading state
     try {
-      const result = await handleSignUp(data.email, data.password); // Await the signup function
+      const result = await handleSignUp(data.email, data.password, data.name); // Await the signup function
 
       if (result.success) {
         // Trigger success message and start progress bar
-        await startProgress(); // Make sure this is defined elsewhere in your code
         setError({
           title: 'Success',
           message: result.success, // Use the success message from the result
           variant: 'default',
         });
+        await startProgress(); // Make sure this is defined elsewhere in your code
         setTimeout(() => navigate('/sign-in'), 1500); // Navigate after a delay
       } else if (result.error) {
         // Handle error case
@@ -124,6 +125,21 @@ export function SignUpForm({ className, setError, startProgress, ...props }: Sig
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className='grid gap-2'>
+            {/* Name field */}
+            <FormField
+              control={control}
+              name='name'
+              render={({ field }) => (
+                <FormItem className='space-y-1'>
+                  <FormLabel>Your Name ?</FormLabel>
+                  <FormControl>
+                    <Input placeholder='John Doe' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* Email Field */}
             <FormField
               control={control}

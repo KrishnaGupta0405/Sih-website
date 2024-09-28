@@ -27,6 +27,8 @@ import ForgotPassword from './pages/auth/forgot-password.tsx';
 import Otp from './pages/auth/otp.tsx';
 import Intro from './pages/Intro.tsx';
 
+// For levelsCompleted-> +10 pts.
+// For modulesCompleted-> +5pts.
 const router = createBrowserRouter([
   // Auth routes
   { path: '/sign-in', element: <SignIn /> },

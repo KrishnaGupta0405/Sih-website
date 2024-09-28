@@ -1,81 +1,97 @@
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { useEffect, useState } from 'react';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { getUserData, auth } from '../../auth/components/firebase/firebase'; // Adjust the import path as necessary
+import { onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth state listener
 
-const data = [
-  {
-    name: 'Jan',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Feb',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Mar',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Apr',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'May',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Jun',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Jul',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Aug',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Sep',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Oct',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Nov',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Dec',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-]
+// Define the type for the activity log entry
+interface ActivityLogEntry {
+  name: string;
+  total: number;
+}
 
 export function Overview() {
+  const [data, setData] = useState<ActivityLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false); // To track if user is authenticated
+
+  useEffect(() => {
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthenticated(true);
+        fetchData(); // Call fetchData when the user is authenticated
+      } else {
+        setAuthenticated(false);
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup the listener on component unmount
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+  
+      // Fetch user data including the last 10 activity logs
+      const { activityLogs } = await getUserData();
+  
+      // Reverse the order of activityLogs to have the latest activity first
+      const reversedLogs = activityLogs.reverse();
+  
+      // Set the activity logs to state with the full date in reverse order
+      setData(
+        reversedLogs.map((log: any) => ({
+          name: new Date(log.activityDate).toLocaleDateString('en-US', {
+            day: 'numeric',  // For the day (28)
+            month: 'short',  // For the month abbreviation (Sep)
+          }),
+          total: log.overallScore, // Use overallScore for the chart
+        }))
+      );
+  
+      console.log(reversedLogs);
+    } catch (error) {
+      console.error('Error fetching user data for chart:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!authenticated) {
+    return <p>User is not authenticated. Please log in.</p>; // Optional, you could redirect to login if needed
+  }
+
   return (
-    <ResponsiveContainer width='100%' height={350}>
-      <BarChart data={data}>
-        <XAxis
-          dataKey='name'
-          stroke='#888888'
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-        />
-        <YAxis
-          stroke='#888888'
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => `$${value}`}
-        />
-        <Bar
-          dataKey='total'
-          fill='currentColor'
-          radius={[4, 4, 0, 0]}
-          className='fill-primary'
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  )
+    <div>
+      <ResponsiveContainer width="100%" height={350}>
+        <BarChart data={data}>
+          <XAxis
+            dataKey="name"
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => `${value}`}
+          />
+          <Bar
+            dataKey="total"
+            fill="currentColor"
+            radius={[4, 4, 0, 0]}
+            className="fill-primary"
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
