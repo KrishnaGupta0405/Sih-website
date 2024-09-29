@@ -59,7 +59,7 @@ export function Overview() {
   
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p style={{margin : "0px 15px"}}>Fetching ...</p>;
   }
 
   if (!authenticated) {

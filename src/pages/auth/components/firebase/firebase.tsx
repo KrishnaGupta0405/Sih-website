@@ -1,6 +1,6 @@
 // Import the necessary functions from Firebase SDK
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { getFirestore, serverTimestamp, doc, getDoc, getDocs, onSnapshot, setDoc, collection, query, where, orderBy, limit, addDoc, deleteDoc } from "firebase/firestore";
 
 // Your Firebase configuration
@@ -31,6 +31,9 @@ export { auth, provider, db };
  const LEVEL_WEIGHT = 10; // Points per completed level
  const MODULE_WEIGHT = 5; // Points per completed module
  const ACTIVITY_LOG_LIMIT = 10; // Max number of activity logs to keep
+ export var OVERALL_SCORE = 0;
+ export var OVERALL_LEVELS = 0;
+ export var OVERALL_MODULES = 0;
 
   // Capitalize the first letter of each word in the name
   function capitalizeFirstLetters(inputString: string) {
@@ -87,34 +90,69 @@ export { auth, provider, db };
     }
   });
 
-  // Function to handle Email Sign-Up
-  export const handleSignUp = async (email: string, password: string, name: string) => {
-    try {
+  // // Function to handle Email Sign-Up
+  // export const handleSignUp = async (email: string, password: string, name: string) => {
+  //   try {
 
-      isSignUpInProgress = true; // Set the flag
+  //     isSignUpInProgress = true; // Set the flag
 
-      console.log("Handle signup started")
-      // Create a new user with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+  //     console.log("Handle signup started")
+  //     // Create a new user with email and password
+  //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
 
-      // Send verification email
-      await sendEmailVerification(user);
+  //     // Send verification email
+  //     await sendEmailVerification(user);
 
-      // Add new user data to Firestore
-      await createOrUpdateUser(user, name);
-      console.log("Handle signup ended")
+  //     // Add new user data to Firestore
+  //     await createOrUpdateUser(user, name);
+  //     console.log("Handle signup ended")
 
-      isSignUpInProgress = false; // Reset the flag
+  //     isSignUpInProgress = false; // Reset the flag
       
-      // Return success message
-      return { success: 'Sign-up successful! A verification email has been sent to your inbox.' };
+  //     // Return success message
+  //     return { success: 'Sign-up successful! A verification email has been sent to your inbox.' };
 
-    } catch (error: any) {
-      // Return error
-      return { error: error.message || 'An error occurred during sign-up.' };
-    }
-  };
+  //   } catch (error: any) {
+  //     // Return error
+  //     return { error: error.message || 'An error occurred during sign-up.' };
+  //   }
+  // };
+
+export const handleSignUp = async (email: string, password: string, name: string) => {
+  try {
+    isSignUpInProgress = true; // Set the flag
+
+    console.log("Handle signup started");
+    
+    // Create a new user with email and password
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Send verification email
+    await sendEmailVerification(user);
+
+    // Update Firebase Authentication profile with displayName
+    await updateProfile(user, {
+      displayName: name,  // Set the display name in Firebase Auth
+    });
+
+    // Add new user data to Firestore
+    await createOrUpdateUser(user, name);
+    console.log("Handle signup ended");
+
+    isSignUpInProgress = false; // Reset the flag
+    
+    // Return success message
+    return { success: 'Sign-up successful! A verification email has been sent to your inbox.' };
+
+  } catch (error: any) {
+    // Return error
+    isSignUpInProgress = false; // Ensure to reset flag even in error
+    return { error: error.message || 'An error occurred during sign-up.' };
+  }
+};
+
 
 // Function to handle Google Sign-Up 
 export const handleGoogleSignUp = async () => {
@@ -251,8 +289,42 @@ export const handleGoogleSignUp = async () => {
     console.log("User activity updated successfully.");
   };
 
+  // Function to calculate overall levels completed from the last 10 days
+  export const calculateOverallLevelsCompleted = async (userId: string): Promise<number> => {
+    const activityLogRef = collection(db, `users/${userId}/activityLog`);
+
+    // Query the last 10 activities
+    const q = query(activityLogRef, orderBy('activityDate', 'desc'), limit(ACTIVITY_LOG_LIMIT));
+    const querySnapshot = await getDocs(q);
+
+    let totalLevelsCompleted = 0;
+    querySnapshot.forEach((doc) => {
+      totalLevelsCompleted += doc.data().levelsCompleted;
+    });
+
+    OVERALL_LEVELS = totalLevelsCompleted;
+    return totalLevelsCompleted;
+  };
+
+  // Function to calculate overall modules completed from the last 10 days
+  export const calculateOverallModulesCompleted = async (userId: string): Promise<number> => {
+    const activityLogRef = collection(db, `users/${userId}/activityLog`);
+
+    // Query the last 10 activities
+    const q = query(activityLogRef, orderBy('activityDate', 'desc'), limit(ACTIVITY_LOG_LIMIT));
+    const querySnapshot = await getDocs(q);
+
+    let totalModulesCompleted = 0;
+    querySnapshot.forEach((doc) => {
+      totalModulesCompleted += doc.data().modulesCompleted;
+    });
+
+    OVERALL_MODULES=totalModulesCompleted;
+    return totalModulesCompleted;
+  };
+
   // Function to calculate overall score from the last 10 days
-  const calculateOverallScore = async (userId: string, lastOverallScore: number): Promise<number> => {
+  export const calculateOverallScore = async (userId: string, lastOverallScore: number): Promise<number> => {
     const activityLogRef = collection(db, 'users', userId, 'activityLog');
 
     // Query the last 10 activities
@@ -266,6 +338,7 @@ export const handleGoogleSignUp = async () => {
 
     // Include the last calculated overall score for today (if present)
     overallScore += lastOverallScore;
+    OVERALL_SCORE=overallScore;
 
     return overallScore;
   };
@@ -281,6 +354,9 @@ export const handleGoogleSignUp = async () => {
 
     // First, update the overall score before deletion
     const overallScore = await calculateOverallScore(userId, 0); // Calculate overall score before deleting
+    const overallLevelsCompleted = await calculateOverallLevelsCompleted(userId); //for the sake of running these funtion
+    const overallModulesCompleted = await calculateOverallModulesCompleted(userId);
+
 
     // Delete the old activities
     const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
@@ -293,42 +369,42 @@ export const handleGoogleSignUp = async () => {
     console.log("Old activities deleted and overall score updated.");
   };
 
-// Function to fetch a user's data including the last 10 activities
-export async function getUserData() {
-  try {
-    const userDocRef = doc(db, 'users', currentUser.uid);
-    const userDoc = await getDoc(userDocRef);
+  // Function to fetch a user's data including the last 10 activities
+  export async function getUserData() {
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
 
-    if (!userDoc.exists()) {
-      console.error("No user data found, setting up the user data as empty");
-      createOrUpdateUser(currentUser);
-      return { userProfile: null, activityLogs: [] }; // Return a fallback value
+      if (!userDoc.exists()) {
+        console.error("No user data found, setting up the user data as empty");
+        createOrUpdateUser(currentUser);
+        return { userProfile: null, activityLogs: [] }; // Return a fallback value
+      }
+
+      // Fetch user profile
+      const userProfile = {
+        displayName: userDoc.data()?.displayName || 'Unknown',
+        overallScore: userDoc.data()?.overallScore || 0,
+        email: userDoc.data()?.email || 'No email available',
+      };
+
+      // Fetch activity logs (limit to 10 most recent)
+      const activityLogRef = collection(db, 'users', currentUser.uid, 'activityLog');
+      const activityQuery = query(activityLogRef, orderBy('activityDate', 'desc'), limit(ACTIVITY_LOG_LIMIT));
+      const activitySnapshot = await getDocs(activityQuery);
+
+      const activityLogs = activitySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        activityDate: doc.data().activityDate.toDate(), // Ensure Firestore Timestamp is converted to Date
+      }));
+
+      console.log({ userProfile, activityLogs });
+      return { userProfile, activityLogs };
+    } catch (error) {
+      console.error('Error retrieving user data:', error);
+      return { userProfile: null, activityLogs: [] }; // Return fallback in case of error
     }
-
-    // Fetch user profile
-    const userProfile = {
-      displayName: userDoc.data()?.displayName || 'Unknown',
-      overallScore: userDoc.data()?.overallScore || 0,
-      email: userDoc.data()?.email || 'No email available',
-    };
-
-    // Fetch activity logs (limit to 10 most recent)
-    const activityLogRef = collection(db, 'users', currentUser.uid, 'activityLog');
-    const activityQuery = query(activityLogRef, orderBy('activityDate', 'desc'), limit(ACTIVITY_LOG_LIMIT));
-    const activitySnapshot = await getDocs(activityQuery);
-
-    const activityLogs = activitySnapshot.docs.map(doc => ({
-      ...doc.data(),
-      activityDate: doc.data().activityDate.toDate(), // Ensure Firestore Timestamp is converted to Date
-    }));
-
-    console.log({ userProfile, activityLogs });
-    return { userProfile, activityLogs };
-  } catch (error) {
-    console.error('Error retrieving user data:', error);
-    return { userProfile: null, activityLogs: [] }; // Return fallback in case of error
   }
-}
 
   // Define a type for leaderboard entries and user profiles
   interface LeaderboardEntry {
@@ -368,4 +444,3 @@ export async function getUserData() {
       console.error("Error fetching top players: ", error);
     }
   };
-
