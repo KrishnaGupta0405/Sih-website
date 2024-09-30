@@ -63,6 +63,7 @@ export { auth, provider, db };
 
       // Set the global user variable so it's available across the file
       currentUser = user;
+      getUserData();
 
       // Optionally, store user info in localStorage
       localStorage.setItem("userID", user.uid);
@@ -290,7 +291,7 @@ export const handleGoogleSignUp = async () => {
   };
 
   // Function to calculate overall levels completed from the last 10 days
-  export const calculateOverallLevelsCompleted = async (userId: string): Promise<number> => {
+  export const calculateOverallLevelsCompleted = async (userId: string = currentUser.uid): Promise<number> => {
     const activityLogRef = collection(db, `users/${userId}/activityLog`);
 
     // Query the last 10 activities
@@ -307,7 +308,7 @@ export const handleGoogleSignUp = async () => {
   };
 
   // Function to calculate overall modules completed from the last 10 days
-  export const calculateOverallModulesCompleted = async (userId: string): Promise<number> => {
+  export const calculateOverallModulesCompleted = async (userId: string = currentUser.uid): Promise<number> => {
     const activityLogRef = collection(db, `users/${userId}/activityLog`);
 
     // Query the last 10 activities
@@ -324,7 +325,7 @@ export const handleGoogleSignUp = async () => {
   };
 
   // Function to calculate overall score from the last 10 days
-  export const calculateOverallScore = async (userId: string, lastOverallScore: number): Promise<number> => {
+  export const calculateOverallScore = async (userId: string = currentUser.uid, lastOverallScore: number = 0): Promise<number> => {
     const activityLogRef = collection(db, 'users', userId, 'activityLog');
 
     // Query the last 10 activities
@@ -369,42 +370,60 @@ export const handleGoogleSignUp = async () => {
     console.log("Old activities deleted and overall score updated.");
   };
 
-  // Function to fetch a user's data including the last 10 activities
-  export async function getUserData() {
-    try {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      const userDoc = await getDoc(userDocRef);
+// Define the structure of an Activity Log
+interface ActivityLog {
+  modulesCompleted: number;
+  levelsCompleted: number;
+  overallScore: number;
+  activityDate: Date; // Use 'Date' for proper date handling
+}
 
-      if (!userDoc.exists()) {
-        console.error("No user data found, setting up the user data as empty");
-        createOrUpdateUser(currentUser);
-        return { userProfile: null, activityLogs: [] }; // Return a fallback value
-      }
+// Global variable to store activity logs
+export let globalActivityLogs: ActivityLog[] = [];
 
-      // Fetch user profile
-      const userProfile = {
-        displayName: userDoc.data()?.displayName || 'Unknown',
-        overallScore: userDoc.data()?.overallScore || 0,
-        email: userDoc.data()?.email || 'No email available',
-      };
+// Function to fetch a user's data including the last 10 activities
+export async function getUserData() {
+  try {
+    const userDocRef = doc(db, 'users', currentUser.uid);
+    const userDoc = await getDoc(userDocRef);
 
-      // Fetch activity logs (limit to 10 most recent)
-      const activityLogRef = collection(db, 'users', currentUser.uid, 'activityLog');
-      const activityQuery = query(activityLogRef, orderBy('activityDate', 'desc'), limit(ACTIVITY_LOG_LIMIT));
-      const activitySnapshot = await getDocs(activityQuery);
-
-      const activityLogs = activitySnapshot.docs.map(doc => ({
-        ...doc.data(),
-        activityDate: doc.data().activityDate.toDate(), // Ensure Firestore Timestamp is converted to Date
-      }));
-
-      console.log({ userProfile, activityLogs });
-      return { userProfile, activityLogs };
-    } catch (error) {
-      console.error('Error retrieving user data:', error);
-      return { userProfile: null, activityLogs: [] }; // Return fallback in case of error
+    if (!userDoc.exists()) {
+      console.error("No user data found, setting up the user data as empty");
+      createOrUpdateUser(currentUser);
+      return { userProfile: null, activityLogs: [] }; // Return a fallback value
     }
+
+    // Fetch user profile
+    const userProfile = {
+      displayName: userDoc.data()?.displayName || 'Unknown',
+      overallScore: userDoc.data()?.overallScore || 0,
+      email: userDoc.data()?.email || 'No email available',
+    };
+
+    // Fetch activity logs (limit to 10 most recent)
+    const activityLogRef = collection(db, 'users', currentUser.uid, 'activityLog');
+    const activityQuery = query(activityLogRef, orderBy('activityDate', 'desc'), limit(ACTIVITY_LOG_LIMIT));
+    const activitySnapshot = await getDocs(activityQuery);
+
+    // Ensure all fields are present and assign default values if missing
+    const activityLogs: ActivityLog[] = activitySnapshot.docs.map(doc => ({
+      modulesCompleted: doc.data().modulesCompleted ?? 0, // Default to 0 if missing
+      levelsCompleted: doc.data().levelsCompleted ?? 0,   // Default to 0 if missing
+      overallScore: doc.data().overallScore ?? 0,         // Default to 0 if missing
+      activityDate: doc.data().activityDate.toDate(),     // Ensure Firestore Timestamp is converted to Date
+    }));
+
+    // Update the exported globalActivityLogs variable
+    globalActivityLogs = activityLogs; // Store fetched logs in the global variable
+
+    console.log("from getusedata",{ userProfile, activityLogs });
+    return { userProfile, activityLogs };
+  } catch (error) {
+    console.error('Error retrieving user data:', error);
+    return { userProfile: null, activityLogs: [] }; // Return fallback in case of error
   }
+}
+
 
   // Define a type for leaderboard entries and user profiles
   interface LeaderboardEntry {

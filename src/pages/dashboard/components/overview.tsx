@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-import { getUserData, auth } from '../../auth/components/firebase/firebase'; // Adjust the import path as necessary
+import { getUserData, auth } from '../../auth/components/firebase/firebase'; 
 import { onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth state listener
 
 // Define the type for the activity log entry
@@ -34,7 +34,7 @@ export function Overview() {
   
       // Fetch user data including the last 10 activity logs
       const { activityLogs } = await getUserData();
-  
+       console.log("activitylog from overview barchart->", activityLogs)
       // Reverse the order of activityLogs to have the latest activity first
       const reversedLogs = activityLogs.reverse();
   
@@ -49,7 +49,8 @@ export function Overview() {
         }))
       );
   
-      console.log(reversedLogs);
+      // console.log("this is reversed log-",reversedLogs);
+      // console.log("this is activity data-", data);
     } catch (error) {
       console.error('Error fetching user data for chart:', error);
     } finally {

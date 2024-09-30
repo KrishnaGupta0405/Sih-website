@@ -8,9 +8,19 @@ import { TopNav } from '@/components/top-nav'
 import { UserNav } from '@/components/user-nav'
 import { RecentSales } from './components/recent-sales'
 import { Overview } from './components/overview'
-import { OVERALL_LEVELS, OVERALL_MODULES, OVERALL_SCORE } from '../auth/components/firebase/firebase'
+import { AreaChartGradient, ChartRadarGridCircleLeft, ChartRadarGridCircleRight, ChartRadarMultipleGridCircle, ComingSoon, HorizontalBarChart } from '@/components/chart-radar-grid-circle'
+import { calculateOverallLevelsCompleted, calculateOverallModulesCompleted, calculateOverallScore } from '../auth/components/firebase/firebase'
 
+var Score = 0;
+var LevelsScore = 0;
+var ModuleScore = 0;
+const func = async()=>{
+  Score = await calculateOverallScore();
+  LevelsScore = await calculateOverallLevelsCompleted();
+  ModuleScore = await calculateOverallModulesCompleted();
+}
 export default function Dashboard() {
+  func();
   return (
     <Layout>
       {/* ===== Top Heading ===== */}
@@ -50,7 +60,7 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>🏆{OVERALL_SCORE}</div>
+                  <div className='text-2xl font-bold'>🏆{Score}</div>
                   <p className='text-xs text-muted-foreground'>Overall performance across all levels and modules.</p>
                 </CardContent>
               </Card>
@@ -64,7 +74,7 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>📚{OVERALL_MODULES}</div>
+                  <div className='text-2xl font-bold'>📚{ModuleScore}</div>
                   <p className='text-xs text-muted-foreground'>Modules finished this month.</p>
                 </CardContent>
               </Card>
@@ -77,7 +87,7 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>🎯{OVERALL_LEVELS}</div>
+                  <div className='text-2xl font-bold'>🎯{LevelsScore}</div>
                   <p className='text-xs text-muted-foreground'>Levels unlocked through your progress.</p>
                 </CardContent>
               </Card>
@@ -114,6 +124,29 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+          <TabsContent value='analytics' className='space-y-4'>
+            <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+              
+              <ChartRadarGridCircleLeft />
+              <ChartRadarMultipleGridCircle/>
+              <ChartRadarGridCircleRight />
+            </div>
+
+            <div className='grid grid-cols-1 gap-4 lg:grid-cols-8'>
+              <div className='col-span-1 lg:col-span-5'>
+                <AreaChartGradient />
+              </div>
+              <div className="col-span-1 lg:col-span-3 grid grid-rows-3 gap-5">
+                <div className='row-span-2'>
+                  <HorizontalBarChart />
+                </div>
+                <div className='row-span-1'>
+                  <ComingSoon />
+                </div>
+              </div>
+            </div>
+
           </TabsContent>
         </Tabs>
       </Layout.Body>
