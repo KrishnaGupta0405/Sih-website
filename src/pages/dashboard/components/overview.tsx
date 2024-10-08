@@ -34,7 +34,7 @@ export function Overview() {
   
       // Fetch user data including the last 10 activity logs
       const { activityLogs } = await getUserData();
-       console.log("activitylog from overview barchart->", activityLogs)
+      //  console.log("activitylog from overview barchart->", activityLogs)
       // Reverse the order of activityLogs to have the latest activity first
       const reversedLogs = activityLogs.reverse();
   

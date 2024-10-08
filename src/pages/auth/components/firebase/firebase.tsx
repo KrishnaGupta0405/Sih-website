@@ -48,22 +48,16 @@ export { auth, provider, db };
   // Listen to auth state changes
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      if (!isSignUpInProgress) {
-      console.log("onauth started")
-      // // Call the function to create or update the user's Firestore document and activity log
-
-      // const useless = async ()=>{
-      //   await createOrUpdateUser(user);
-      // }; useless()
-
-      // User is signed in
-      console.log("User ID:", user.uid);
-      console.log("User Email:", user.email);
+      if (!isSignUpInProgress) {      
+      // console.log("User ID:", user.uid);
+      // console.log("User Email:", user.email);
       console.log("Display Name:", capitalizeFirstLetters(user.displayName || ""));
+
+      // getUserData();
 
       // Set the global user variable so it's available across the file
       currentUser = user;
-      getUserData();
+      // getUserData();
 
       // Optionally, store user info in localStorage
       localStorage.setItem("userID", user.uid);
@@ -414,10 +408,11 @@ export async function getUserData() {
     }));
 
     // Update the exported globalActivityLogs variable
-    globalActivityLogs = activityLogs; // Store fetched logs in the global variable
+    // globalActivityLogs = activityLogs; // Store fetched logs in the global variable
 
-    console.log("from getusedata",{ userProfile, activityLogs });
-    return { userProfile, activityLogs };
+    // console.log("from getusedata of firebase.tsx",{ userProfile, activityLogs });
+    // return { userProfile, activityLogs };
+    return { activityLogs };
   } catch (error) {
     console.error('Error retrieving user data:', error);
     return { userProfile: null, activityLogs: [] }; // Return fallback in case of error
@@ -463,3 +458,68 @@ export async function getUserData() {
       console.error("Error fetching top players: ", error);
     }
   };
+
+  // import { Timestamp} from 'firebase/firestore';
+  
+  // // Define the structure for activity log data
+  // interface ActivityLog {
+  //   activityDate: Timestamp;
+  //   levelsCompleted: number;
+  //   modulesCompleted: number;
+  //   overallScore: number;
+  // }
+  
+  // // Function to generate random activity data for the last 10 days
+  // const generateActivityLogData = (): ActivityLog[] => {
+  //   const activityLog: ActivityLog[] = [];
+  //   const currentDate = new Date();
+  
+  //   for (let i = 0; i < 10; i++) {
+  //     const activityDate = new Date(currentDate);
+  //     activityDate.setDate(currentDate.getDate() - i);
+  
+  //     activityLog.push({
+  //       activityDate: Timestamp.fromDate(activityDate), // Firebase Timestamp format
+  //       levelsCompleted: Math.floor(Math.random() * 3) + 1, // Random number between 1 and 3
+  //       modulesCompleted: Math.floor(Math.random() * 5) + 1, // Random number between 1 and 5
+  //       overallScore: Math.floor(Math.random() * 50) + 10, // Random score between 10 and 60
+  //     });
+  //   }
+  
+  //   return activityLog;
+  // };
+  
+  // // Function to feed dummy data for the currently logged-in user
+  // export const feedDummyDataForUser = async (): Promise<void> => {
+  //   const auth = getAuth();
+  //   const currentUser = auth.currentUser;
+  
+  //   if (!currentUser) {
+  //     console.error('No user is currently logged in');
+  //     return;
+  //   }
+  
+  //   const userUid = currentUser.uid; // Retrieve UID of the logged-in user
+  //   const activityLogData: ActivityLog[] = generateActivityLogData();
+  
+  //   try {
+  //     // Loop through each day and add the activity log data for that day
+  //     for (let i = 0; i < activityLogData.length; i++) {
+  //       const activityLogEntry = activityLogData[i];
+  
+  //       // Generate a unique ID for each activity log entry
+  //       const activityLogId = `activityLog_${i + 1}`;
+  
+  //       // Reference to the specific activityLog document in Firestore
+  //       const activityLogDocRef = doc(collection(db, `users/${userUid}/activityLog`), activityLogId);
+  
+  //       // Add the activity log entry to Firestore
+  //       await setDoc(activityLogDocRef, activityLogEntry);
+  //     }
+  
+  //     console.log(`Dummy data successfully added to activity log for user: ${userUid}`);
+  //   } catch (error: any) {
+  //     console.error('Error adding dummy activity log data: ', error);
+  //   }
+  // };
+  

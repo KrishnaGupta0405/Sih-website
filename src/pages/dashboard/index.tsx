@@ -8,19 +8,83 @@ import { TopNav } from '@/components/top-nav'
 import { UserNav } from '@/components/user-nav'
 import { RecentSales } from './components/recent-sales'
 import { Overview } from './components/overview'
-import { AreaChartGradient, ChartRadarGridCircleLeft, ChartRadarGridCircleRight, ChartRadarMultipleGridCircle, ComingSoon, HorizontalBarChart } from '@/components/chart-radar-grid-circle'
-import { calculateOverallLevelsCompleted, calculateOverallModulesCompleted, calculateOverallScore } from '../auth/components/firebase/firebase'
+// import { AreaChartGradient, ChartRadarGridCircleLeft, ChartRadarGridCircleRight, ChartRadarMultipleGridCircle, ComingSoon, HorizontalBarChart } from '@/components/chart-radar-grid-circle'
+import { ChartRadarGridCircleLeft } from '@/components/chart-radar-grid-circle'
+import { calculateOverallLevelsCompleted, calculateOverallModulesCompleted, calculateOverallScore, getUserData } from '../auth/components/firebase/firebase'
+import { useState, useEffect } from 'react'
+import { auth } from '../auth/components/firebase/firebase'; 
+import { onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth state listener
 
-var Score = 0;
-var LevelsScore = 0;
-var ModuleScore = 0;
-const func = async()=>{
-  Score = await calculateOverallScore();
-  LevelsScore = await calculateOverallLevelsCompleted();
-  ModuleScore = await calculateOverallModulesCompleted();
-}
 export default function Dashboard() {
-  func();
+
+  const [overallScore, setOverallScore] =  useState<number | null>(null);
+  const [moduleScore, setModuleScore] =  useState<number | null>(null);
+  const [levelScore, setLevelScore] =  useState<number | null>(null);
+  const [authenticated, setAuthenticated] = useState(false); // To track if user is authenticated
+  const [loading, setLoading] = useState(true);
+
+  // Define the structure of an Activity Log 
+  interface ActivityLog {
+    modulesCompleted: number;
+    levelsCompleted: number;
+    overallScore: number;
+    activityDate: Date; // Use 'Date' for proper date handling
+  }
+
+  // Global variable to store activity logs
+  let globalActivityLogs: ActivityLog[] = [];
+
+  // Use state to manage activity logs locally
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+
+  useEffect(() => {
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthenticated(true);
+        fetchData();
+      } else {
+        setAuthenticated(false);
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup the listener on component unmount
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      let total = await calculateOverallModulesCompleted();
+      setModuleScore(total);
+
+      total = await calculateOverallLevelsCompleted();
+      setLevelScore(total);
+
+      total = await calculateOverallScore();
+      setOverallScore(total);
+
+      const { activityLogs } = await getUserData(); // Await the async call
+      globalActivityLogs = activityLogs; // Update global variable
+      setActivityLogs(activityLogs); // Update local state if needed for rendering
+
+      // console.log("useEffect of index.tsx", activityLogs);
+
+    } catch (error) {
+      console.error('Error fetching user data for chart:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // if (loading) {
+  //   return <p style={{margin : "0px 15px"}}>Fetching ...</p>;
+  // }
+
+  if (!authenticated) {
+    return <p>User is not authenticated. Please log in.</p>; // Optional, you could redirect to login if needed
+  }
+
   return (
     <Layout>
       {/* ===== Top Heading ===== */}
@@ -41,7 +105,7 @@ export default function Dashboard() {
             <Button>Download</Button>
           </div>
         </div>
-        <Tabs orientation='vertical' defaultValue='overview' className='space-y-4'>
+        <Tabs orientation='vertical' defaultValue='analytics' className='space-y-4'>
           <div className='w-full overflow-x-auto pb-2'>
             <TabsList>
               <TabsTrigger value='overview'>Overview</TabsTrigger>
@@ -60,7 +124,7 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>🏆{Score}</div>
+                  <div className='text-2xl font-bold'>🏆{overallScore}</div>
                   <p className='text-xs text-muted-foreground'>Overall performance across all levels and modules.</p>
                 </CardContent>
               </Card>
@@ -74,7 +138,7 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>📚{ModuleScore}</div>
+                  <div className='text-2xl font-bold'>📚{moduleScore}</div>
                   <p className='text-xs text-muted-foreground'>Modules finished this month.</p>
                 </CardContent>
               </Card>
@@ -87,7 +151,7 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>🎯{LevelsScore}</div>
+                  <div className='text-2xl font-bold'>🎯{levelScore}</div>
                   <p className='text-xs text-muted-foreground'>Levels unlocked through your progress.</p>
                 </CardContent>
               </Card>
@@ -128,12 +192,12 @@ export default function Dashboard() {
           <TabsContent value='analytics' className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
               
-              <ChartRadarGridCircleLeft />
-              <ChartRadarMultipleGridCircle/>
-              <ChartRadarGridCircleRight />
+              <ChartRadarGridCircleLeft globalActivityLogs={activityLogs}/>
+              {/* <ChartRadarMultipleGridCircle/> */}
+              {/* <ChartRadarGridCircleRight /> */}
             </div>
 
-            <div className='grid grid-cols-1 gap-4 lg:grid-cols-8'>
+            {/* <div className='grid grid-cols-1 gap-4 lg:grid-cols-8'>
               <div className='col-span-1 lg:col-span-5'>
                 <AreaChartGradient />
               </div>
@@ -145,7 +209,7 @@ export default function Dashboard() {
                   <ComingSoon />
                 </div>
               </div>
-            </div>
+            </div> */}
 
           </TabsContent>
         </Tabs>
