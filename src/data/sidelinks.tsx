@@ -44,7 +44,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Games',
     label: '3',
-    href: '/tasks',
+    href: '/apps',
     icon: <IconComponents size={18} />,
   },
   {
@@ -56,7 +56,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Rulebook',
     label: '',
-    href: '/apps',
+    href: '/tasks',
     icon: <IconChecklist size={18} />,
   },
   {

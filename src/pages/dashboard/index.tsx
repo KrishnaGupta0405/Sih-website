@@ -8,12 +8,12 @@ import { TopNav } from '@/components/top-nav'
 import { UserNav } from '@/components/user-nav'
 import { RecentSales } from './components/recent-sales'
 import { Overview } from './components/overview'
-// import { AreaChartGradient, ChartRadarGridCircleLeft, ChartRadarGridCircleRight, ChartRadarMultipleGridCircle, ComingSoon, HorizontalBarChart } from '@/components/chart-radar-grid-circle'
-import { ChartRadarGridCircleLeft } from '@/components/chart-radar-grid-circle'
+import { AreaChartGradient, ChartRadarGridCircleLeft, ChartRadarGridCircleRight, ChartRadarMultipleGridCircle, ComingSoonn, HorizontalBarChart } from '@/components/chart-radar-grid-circle'
 import { calculateOverallLevelsCompleted, calculateOverallModulesCompleted, calculateOverallScore, getUserData } from '../auth/components/firebase/firebase'
 import { useState, useEffect } from 'react'
 import { auth } from '../auth/components/firebase/firebase'; 
 import { onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth state listener
+import ComingSoon from '@/components/coming-soon';
 
 export default function Dashboard() {
 
@@ -192,12 +192,12 @@ export default function Dashboard() {
           <TabsContent value='analytics' className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
               
-              <ChartRadarGridCircleLeft globalActivityLogs={activityLogs}/>
-              {/* <ChartRadarMultipleGridCircle/> */}
-              {/* <ChartRadarGridCircleRight /> */}
+              <ChartRadarGridCircleLeft />
+              <ChartRadarMultipleGridCircle/>
+              <ChartRadarGridCircleRight />
             </div>
 
-            {/* <div className='grid grid-cols-1 gap-4 lg:grid-cols-8'>
+            <div className='grid grid-cols-1 gap-4 lg:grid-cols-8'>
               <div className='col-span-1 lg:col-span-5'>
                 <AreaChartGradient />
               </div>
@@ -206,11 +206,18 @@ export default function Dashboard() {
                   <HorizontalBarChart />
                 </div>
                 <div className='row-span-1'>
-                  <ComingSoon />
+                  <ComingSoonn />
                 </div>
               </div>
-            </div> */}
+            </div>
 
+          </TabsContent>
+          <TabsContent value='reports' className='space-y-4'>
+            <ComingSoon/>
+
+          </TabsContent>
+          <TabsContent value='notifications' className='space-y-4'>
+            <ComingSoon/>
           </TabsContent>
         </Tabs>
       </Layout.Body>

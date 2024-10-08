@@ -1,7 +1,7 @@
 // import { globalActivityLogs } from '../pages/auth/components/firebase/firebase';
 import { TrendingUp } from "lucide-react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart } from "recharts";
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getUserData } from "@/pages/auth/components/firebase/firebase";
 
 import {
@@ -38,12 +38,33 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 
+const chartdata = [
+  { month: "January", desktop: 186 },
+  { month: "February", desktop: 305 },
+  { month: "March", desktop: 237 },
+  { month: "April", desktop: 273 },
+  { month: "May", desktop: 209 },
+  { month: "June", desktop: 214 },
+  { month: "july", desktop: 300 },
+  { month: "august", desktop: 50 },
+];
+const chartdatamultipleboth = [
+  { month: "January", desktop: 186, mobile:202 },
+  { month: "February", desktop: 305, mobile:50 },
+  { month: "March", desktop: 237, mobile:183 },
+  { month: "April", desktop: 273,mobile:79  },
+  { month: "May", desktop: 209,mobile:122 },
+  { month: "June", desktop: 214,mobile:50 },
+  { month: "july", desktop: 300,mobile:214 },
+  { month: "august", desktop: 50,mobile:237 },
+];
+
 // Define the type for the chart data
-interface ChartDataMultiple {
-  month: string;
-  desktop: number;
-  mobile:number,
-}
+// interface ChartDataMultiple {
+//   month: string;
+//   desktop: number;
+//   mobile:number,
+// }
 
 // // chart only for modules completed
 // const transformActivityLogsModules = (globalActivityLogs: ActivityLog[]): ChartData[] => {
@@ -59,49 +80,49 @@ interface ChartDataMultiple {
 //       };
 //   });
 // };
-// chart only for modules completed
-const transformActivityLogsLevels = (globalActivityLogs: ActivityLog[]): ChartData[] => {
-  return globalActivityLogs.map(log => {
-      const activityDate = new Date(log.activityDate);
-      const month = activityDate.toLocaleString('default', { month: 'long' });
-      const day = activityDate.getDate();
-      const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
+// // chart only for modules completed
+// const transformActivityLogsLevels = (globalActivityLogs: ActivityLog[]): ChartData[] => {
+//   return globalActivityLogs.map(log => {
+//       const activityDate = new Date(log.activityDate);
+//       const month = activityDate.toLocaleString('default', { month: 'long' });
+//       const day = activityDate.getDate();
+//       const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
 
-      return {
-          month: formattedDate,
-          desktop: log.levelsCompleted,
-      };
-  });
-};
-// chart only for overallScore
-const transformActivityLogsOverallScore = (globalActivityLogs: ActivityLog[]): ChartData[] => {
-  return globalActivityLogs.map(log => {
-      const activityDate = new Date(log.activityDate);
-      const month = activityDate.toLocaleString('default', { month: 'long' });
-      const day = activityDate.getDate();
-      const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
+//       return {
+//           month: formattedDate,
+//           desktop: log.levelsCompleted,
+//       };
+//   });
+// };
+// // chart only for overallScore
+// const transformActivityLogsOverallScore = (globalActivityLogs: ActivityLog[]): ChartData[] => {
+//   return globalActivityLogs.map(log => {
+//       const activityDate = new Date(log.activityDate);
+//       const month = activityDate.toLocaleString('default', { month: 'long' });
+//       const day = activityDate.getDate();
+//       const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
 
-      return {
-          month: formattedDate,
-          desktop: log.overallScore,
-      };
-  });
-};
-// chart only for modules completed
-const transformActivityLogsBothLevelsModules = (globalActivityLogs: ActivityLog[]): ChartDataMultiple[] => {
-  return globalActivityLogs.map(log => {
-      const activityDate = new Date(log.activityDate);
-      const month = activityDate.toLocaleString('default', { month: 'long' });
-      const day = activityDate.getDate();
-      const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
+//       return {
+//           month: formattedDate,
+//           desktop: log.overallScore,
+//       };
+//   });
+// };
+// // chart only for modules completed
+// const transformActivityLogsBothLevelsModules = (globalActivityLogs: ActivityLog[]): ChartDataMultiple[] => {
+//   return globalActivityLogs.map(log => {
+//       const activityDate = new Date(log.activityDate);
+//       const month = activityDate.toLocaleString('default', { month: 'long' });
+//       const day = activityDate.getDate();
+//       const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
 
-      return {
-          month: formattedDate,
-          desktop: log.levelsCompleted,
-          mobile: log.modulesCompleted,
-      };
-  });
-};
+//       return {
+//           month: formattedDate,
+//           desktop: log.levelsCompleted,
+//           mobile: log.modulesCompleted,
+//       };
+//   });
+// };
 
 // //sample chart data for level
 // const chartDataLevels = transformActivityLogsLevels(globalActivityLogs);
@@ -237,7 +258,7 @@ const transformActivityLogsBothLevelsModules = (globalActivityLogs: ActivityLog[
 //   );
 // }
 
-// // Transform function to format the data for chart
+// Transform function to format the data for chart
 // const transformActivityLogsModules = (globalActivityLogs: ActivityLog[]): Promise<ChartData[]> => {
 //   return new Promise((resolve) => {
 //     const transformedData = globalActivityLogs.map(log => {
@@ -259,73 +280,39 @@ const transformActivityLogsBothLevelsModules = (globalActivityLogs: ActivityLog[
 // // Use state to manage activity logs locally
 // const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
 
-// Define the types for the activity log entry
-interface ActivityLog {
-  modulesCompleted: number;
-  levelsCompleted: number;
-  overallScore: number;
-  activityDate: Date;
-}
+// // Define the types for the activity log entry
+// interface ActivityLog {
+//   modulesCompleted: number;
+//   levelsCompleted: number;
+//   overallScore: number;
+//   activityDate: Date;
+// }
 
-// Define the type for the chart data
-interface ChartData {
-  month: string;
-  desktop: number;
-}
-let chartDataModulesKrishna : any= [];
+// // Define the type for the chart data
+// interface ChartData {
+//   month: string;
+//   desktop: number;
+// }
+// // Transform function to format the data for chart
+// const transformActivityLogsModules = (globalActivityLogs: ActivityLog[]): Promise<ChartData[]> => {
+//   return new Promise((resolve) => {
+//     const transformedData = globalActivityLogs.map(log => {
+//       const activityDate = new Date(log.activityDate);
+//       const month = activityDate.toLocaleString('default', { month: 'long' });
+//       const day = activityDate.getDate();
+//       const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
 
-// Transform function to format the data for chart
-const transformActivityLogsModules = (globalActivityLogs: ActivityLog[]): Promise<ChartData[]> => {
-  return new Promise((resolve) => {
-    const transformedData = globalActivityLogs.map(log => {
-      const activityDate = new Date(log.activityDate);
-      const month = activityDate.toLocaleString('default', { month: 'long' });
-      const day = activityDate.getDate();
-      const formattedDate = `${day} ${month.substring(0, 3)}`; // Format: "20 Sep"
+//       return {
+//         month: formattedDate,
+//         desktop: log.levelsCompleted,
+//       };
+//     });
 
-      return {
-        month: formattedDate,
-        desktop: log.modulesCompleted,
-      };
-    });
+//     resolve(transformedData); // Return the transformed data as a resolved promise
+//   });
+// };
 
-    resolve(transformedData); // Return the transformed data as a resolved promise
-  });
-};
-
-export const ChartRadarGridCircleLeft = ({ globalActivityLogs }: { globalActivityLogs: ActivityLog[] }) => {
-  const [chartDataModules, setChartDataModules] = useState<ChartData[]>([]);
-
-  useEffect(() => {
-    const fetchChartData = async () => {
-      // console.log("globalActivityLogs->", globalActivityLogs); // Log to check data
-      const data = await transformActivityLogsModules(globalActivityLogs);
-      setChartDataModules(data);
-      // chartDataModulesKrishna = data;
-    };
-
-    fetchChartData();
-  }, [globalActivityLogs]);
-
-  useEffect(() => {
-    console.log("Updated chartDataModules:", chartDataModules); // Log the transformed data
-    console.log("chart data", chartdata);
-  }, [chartDataModules]);
-
-  if (chartDataModules.length === 0) {
-    return <p>Loading chart data ...</p>;
-  }
-
-    const chartdata = [
-    { month: "January", desktop: 186 },
-    { month: "February", desktop: 305 },
-    { month: "March", desktop: 237 },
-    { month: "April", desktop: 273 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 214 },
-    { month: "july", desktop: 300 },
-    { month: "august", desktop: 50 },
-  ];
+export const ChartRadarGridCircleLeft = () => {
   return (
     <Card>
       <CardHeader className="items-center pb-4">
@@ -337,7 +324,7 @@ export const ChartRadarGridCircleLeft = ({ globalActivityLogs }: { globalActivit
           config={chartConfig}
           className="mx-auto aspect-square max-h-[330px]"
         >
-          <RadarChart data={chartDataModules}>
+          <RadarChart data={chartdata}>
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
@@ -369,250 +356,250 @@ export const ChartRadarGridCircleLeft = ({ globalActivityLogs }: { globalActivit
 };
 
 
-// // Function for the radar chart of levels completed
-// export function ChartRadarGridCircleRight() {
-  // const chartDataSingle = [
-// //   //   { month: "January", desktop: 186 },
-// //   //   { month: "February", desktop: 1 },
-// //   //   { month: "March", desktop: 1 },
-// //   //   { month: "April", desktop: 1 },
-// //   //   { month: "May", desktop: 2 },
-// //   //   { month: "June", desktop: 0 },
-// //   // ];5
+// Function for the radar chart of levels completed
+export function ChartRadarGridCircleRight() {
+  const chartDataSingle = [
+    { month: "January", desktop: 186 },
+    { month: "February", desktop: 1 },
+    { month: "March", desktop: 1 },
+    { month: "April", desktop: 1 },
+    { month: "May", desktop: 2 },
+    { month: "June", desktop: 0 },
+  ]
 
-// 0//   return (
-// //     <Card>
-//       <CardHeader className="items-center pb-4">
-//         <CardTitle>Total Levels Completed</CardTitle>
-//         <CardDescription>
-//         Summary of levels completed recently.
-//         </CardDescription>
-//       </CardHeader>
-//       <CardContent className="pb-0">
-//         <ChartContainer
-//           config={chartConfig}
-//           className="mx-auto aspect-square max-h-[330px]"
-//         >
-//           <RadarChart data={chartDataLevels}>
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent hideLabel />}
-//             />
-//             <PolarGrid gridType="circle" />
-//             <PolarAngleAxis dataKey="month" />
-//             <Radar
-//               dataKey="desktop"
-//               fill="var(--color-desktop)"
-//               fillOpacity={0.6}
-//               dot={{
-//                 r: 4,
-//                 fillOpacity: 1,
-//               }}
-//             />
-//           </RadarChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col gap-2 text-sm">
-//         <div className="flex items-center gap-2 font-medium leading-none">
-//         Tracking progress in Level completion <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="flex items-center gap-2 leading-none text-muted-foreground">
-//           Last 10 Days.
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
+ return (
+   <Card>
+      <CardHeader className="items-center pb-4">
+        <CardTitle>Total Levels Completed</CardTitle>
+        <CardDescription>
+        Summary of levels completed recently.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[330px]"
+        >
+          <RadarChart data={chartdata}>
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <PolarGrid gridType="circle" />
+            <PolarAngleAxis dataKey="month" />
+            <Radar
+              dataKey="desktop"
+              fill="var(--color-desktop)"
+              fillOpacity={0.6}
+              dot={{
+                r: 4,
+                fillOpacity: 1,
+              }}
+            />
+          </RadarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
+        Tracking progress in Level completion <TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="flex items-center gap-2 leading-none text-muted-foreground">
+          Last 10 Days.
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
-// // New function for the radar chart with a legend
-// export function ChartRadarMultipleGridCircle() {
-//   return (
-//     <Card>
-//       <CardHeader className="items-center pb-4">
-//         <CardTitle>Modules and Levels Completed</CardTitle>
-//         <CardDescription>
-//         Combined modules and levels completed.
-//         </CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer
-//           config={chartConfig}
-//           className="mx-auto aspect-square max-h-[330px]"
-//         >
-//           <RadarChart
-//             data={chartDataModulesLevels}
-//             margin={{
-//               top: -40,
-//               bottom: -10,
-//             }}
-//           >
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent indicator="line" />}
-//             />
-//             <PolarAngleAxis dataKey="month" />
-//             <PolarGrid />
-//             <Radar
-//               dataKey="desktop"
-//               fill="var(--color-desktop)"
-//               fillOpacity={0.6}
-//             />
-//             <Radar dataKey="mobile" fill="var(--color-mobile)" />
-//             <ChartLegend className="mt-8" content={<ChartLegendContent />} />
-//           </RadarChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col gap-2 pt-4 text-sm">
-//         <div className="flex items-center gap-2 font-medium leading-none">
-//         Insights on recent module and level.<TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="flex items-center gap-2 leading-none text-muted-foreground">
-//           Last 10 Days.
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
+// New function for the radar chart with a legend
+export function ChartRadarMultipleGridCircle() {
+  return (
+    <Card>
+      <CardHeader className="items-center pb-4">
+        <CardTitle>Modules and Levels Completed</CardTitle>
+        <CardDescription>
+        Combined modules and levels completed.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[330px]"
+        >
+          <RadarChart
+            data={chartdatamultipleboth}
+            margin={{
+              top: -40,
+              bottom: -10,
+            }}
+          >
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="line" />}
+            />
+            <PolarAngleAxis dataKey="month" />
+            <PolarGrid />
+            <Radar
+              dataKey="desktop"
+              fill="var(--color-desktop)"
+              fillOpacity={0.6}
+            />
+            <Radar dataKey="mobile" fill="var(--color-mobile)" />
+            <ChartLegend className="mt-8" content={<ChartLegendContent />} />
+          </RadarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col gap-2 pt-4 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
+        Insights on recent module and level.<TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="flex items-center gap-2 leading-none text-muted-foreground">
+          Last 10 Days.
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
-// // Function for the area chart with gradient fill
-// export function AreaChartGradient() {
-//   return (
-//     <Card >
-//       <CardHeader>
-//         <CardTitle>Combined Proficiency Analysis</CardTitle>
-//         <CardDescription>
-//         Synergistic insights on module and level achievements.
-//         </CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig}>
-//           <AreaChart
-//             accessibilityLayer
-//             data={chartDataModulesLevels}
-//             margin={{
-//               left: 12,
-//               right: 12,
-//             }}
-//           >
-//             <CartesianGrid vertical={false} />
-//             <XAxis
-//               dataKey="month"
-//               tickLine={true}
-//               axisLine={false}
-//               tickMargin={8}
-//               tickFormatter={(value) => value.slice(0, 3)}
-//             />
-//             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-//             <defs>
-//               <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-//                 <stop
-//                   offset="5%"
-//                   stopColor="var(--color-desktop)"
-//                   stopOpacity={0.8}
-//                 />
-//                 <stop
-//                   offset="95%"
-//                   stopColor="var(--color-desktop)"
-//                   stopOpacity={0.1}
-//                 />
-//               </linearGradient>
-//               <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-//                 <stop
-//                   offset="5%"
-//                   stopColor="var(--color-mobile)"
-//                   stopOpacity={0.8}
-//                 />
-//                 <stop
-//                   offset="95%"
-//                   stopColor="var(--color-mobile)"
-//                   stopOpacity={0.1}
-//                 />
-//               </linearGradient>
-//             </defs>
-//             <Area
-//               dataKey="mobile"
-//               type="natural"
-//               fill="url(#fillMobile)"
-//               fillOpacity={0.4}
-//               stroke="var(--color-mobile)"
-//               stackId="a"
-//             />
-//             <Area
-//               dataKey="desktop"
-//               type="natural"
-//               fill="url(#fillDesktop)"
-//               fillOpacity={0.4}
-//               stroke="var(--color-desktop)"
-//               stackId="a"
-//             />
-//           </AreaChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter>
-//         <div className="flex w-full items-start gap-2 text-sm">
-//           <div className="grid gap-2">
-//             <div className="flex items-center gap-2 font-medium leading-none">
-//             Summary of concurrent module and level completions. <TrendingUp className="h-4 w-4" />
-//             </div>
-//             <div className="flex items-center gap-2 leading-none text-muted-foreground">
-//               of last 10 Days.
-//             </div>
-//           </div>
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
+// Function for the area chart with gradient fill
+export function AreaChartGradient() {
+  return (
+    <Card >
+      <CardHeader>
+        <CardTitle>Combined Proficiency Analysis</CardTitle>
+        <CardDescription>
+        Synergistic insights on module and level achievements.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig}>
+          <AreaChart
+            accessibilityLayer
+            data={chartdatamultipleboth}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="month"
+              tickLine={true}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <defs>
+              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-desktop)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-desktop)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-mobile)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-mobile)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+            </defs>
+            <Area
+              dataKey="mobile"
+              type="natural"
+              fill="url(#fillMobile)"
+              fillOpacity={0.4}
+              stroke="var(--color-mobile)"
+              stackId="a"
+            />
+            <Area
+              dataKey="desktop"
+              type="natural"
+              fill="url(#fillDesktop)"
+              fillOpacity={0.4}
+              stroke="var(--color-desktop)"
+              stackId="a"
+            />
+          </AreaChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter>
+        <div className="flex w-full items-start gap-2 text-sm">
+          <div className="grid gap-2">
+            <div className="flex items-center gap-2 font-medium leading-none">
+            Summary of concurrent module and level completions. <TrendingUp className="h-4 w-4" />
+            </div>
+            <div className="flex items-center gap-2 leading-none text-muted-foreground">
+              of last 10 Days.
+            </div>
+          </div>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
-// // Function for the horizontal bar chart
-// export function HorizontalBarChart() {
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle>Overall Performance Score</CardTitle>
-//         <CardDescription>Summary of overall scores recently.</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig}>
-//           <BarChart
-//             accessibilityLayer
-//             data={chartDataOverallScore}
-//             layout="vertical"
-//             margin={{
-//               left: -20,
-//             }}
-//           >
-//             <XAxis type="number" dataKey="desktop" hide />
-//             <YAxis
-//               dataKey="month"
-//               type="category"
-//               tickLine={false}
-//               tickMargin={10}
-//               axisLine={false}
-//               tickFormatter={(value) => value.slice(0, 3)}
-//             />
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent hideLabel />}
-//             />
-//             <Bar dataKey="desktop" fill="var(--color-desktop)" radius={5} />
-//           </BarChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col items-start gap-2 text-sm">
-//         <div className="flex gap-2 font-medium leading-none">
-//         Overall Performance Score <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="leading-none text-muted-foreground">
-//         Cumulative score from the last 6 months.
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
+// Function for the horizontal bar chart
+export function HorizontalBarChart() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Overall Performance Score</CardTitle>
+        <CardDescription>Summary of overall scores recently.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig}>
+          <BarChart
+            accessibilityLayer
+            data={chartdata}
+            layout="vertical"
+            margin={{
+              left: -20,
+            }}
+          >
+            <XAxis type="number" dataKey="desktop" hide />
+            <YAxis
+              dataKey="month"
+              type="category"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Bar dataKey="desktop" fill="var(--color-desktop)" radius={5} />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
+        Overall Performance Score <TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="leading-none text-muted-foreground">
+        Cumulative score from the last 6 months.
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
 // Function for Coming soon
-export function ComingSoon() {
+export function ComingSoonn() {
     return (
       <Card>
         <CardHeader>

@@ -17,41 +17,47 @@ import {
 } from '@tabler/icons-react'
 
 export const apps = [
+  // {
+  //   name: 'Telegram',
+  //   logo: <IconBrandTelegram />,
+  //   connected: false,
+  //   desc: 'Connect with Telegram for real-time communication.',
+  // },
+  // {
+  //   name: 'Notion',
+  //   logo: <IconBrandNotion />,
+  //   connected: true,
+  //   desc: 'Effortlessly sync Notion pages for seamless collaboration.',
+  // },
+  // {
+  //   name: 'Figma',
+  //   logo: <IconBrandFigma />,
+  //   connected: true,
+  //   desc: 'View and collaborate on Figma designs in one place.',
+  // },
+  // {
+  //   name: 'Trello',
+  //   logo: <IconBrandTrello />,
+  //   connected: false,
+  //   desc: 'Sync Trello cards for streamlined project management.',
+  // },
   {
-    name: 'Telegram',
-    logo: <IconBrandTelegram />,
-    connected: false,
-    desc: 'Connect with Telegram for real-time communication.',
-  },
-  {
-    name: 'Notion',
-    logo: <IconBrandNotion />,
-    connected: true,
-    desc: 'Effortlessly sync Notion pages for seamless collaboration.',
-  },
-  {
-    name: 'Figma',
-    logo: <IconBrandFigma />,
-    connected: true,
-    desc: 'View and collaborate on Figma designs in one place.',
-  },
-  {
-    name: 'Trello',
-    logo: <IconBrandTrello />,
-    connected: false,
-    desc: 'Sync Trello cards for streamlined project management.',
-  },
-  {
-    name: 'Slack',
+    name: 'DopeRun',
     logo: <IconBrandSlack />,
-    connected: false,
+    connected: true,
     desc: 'Integrate Slack for efficient team communication',
   },
+  // {
+  //   name: 'Zoom',
+  //   logo: <IconBrandZoom />,
+  //   connected: false,
+  //   desc: 'Host Zoom meetings directly from the dashboard.',
+  // },
   {
-    name: 'Zoom',
-    logo: <IconBrandZoom />,
-    connected: true,
-    desc: 'Host Zoom meetings directly from the dashboard.',
+    name: 'zzz More Coming Soon!!',
+    logo: <IconBrandNotion />,
+    connected: false,
+    desc: 'Keep leaning!.',
   },
   {
     name: 'Stripe',
@@ -62,7 +68,7 @@ export const apps = [
   {
     name: 'Gmail',
     logo: <IconBrandGmail />,
-    connected: true,
+    connected: false,
     desc: 'Access and manage Gmail messages effortlessly.',
   },
   {
@@ -77,12 +83,12 @@ export const apps = [
     connected: false,
     desc: 'Connect with Skype contacts seamlessly.',
   },
-  {
-    name: 'Docker',
-    logo: <IconBrandDocker />,
-    connected: false,
-    desc: 'Effortlessly manage Docker containers on your dashboard.',
-  },
+  // {
+  //   name: 'Docker',
+  //   logo: <IconBrandDocker />,
+  //   connected: false,
+  //   desc: 'Effortlessly manage Docker containers on your dashboard.',
+  // },
   {
     name: 'GitHub',
     logo: <IconBrandGithub />,
@@ -90,21 +96,21 @@ export const apps = [
     desc: 'Streamline code management with GitHub integration.',
   },
   {
-    name: 'GitLab',
+    name: 'DopeSmash',
     logo: <IconBrandGitlab />,
-    connected: false,
+    connected: true,
     desc: 'Efficiently manage code projects with GitLab integration.',
   },
-  {
-    name: 'Discord',
-    logo: <IconBrandDiscord />,
-    connected: false,
-    desc: 'Connect with Discord for seamless team communication.',
-  },
-  {
-    name: 'WhatsApp',
-    logo: <IconBrandWhatsapp />,
-    connected: false,
-    desc: 'Easily integrate WhatsApp for direct messaging.',
-  },
+  // {
+  //   name: 'Discord',
+  //   logo: <IconBrandDiscord />,
+  //   connected: false,
+  //   desc: 'Connect with Discord for seamless team communication.',
+  // },
+  // {
+  //   name: 'WhatsApp',
+  //   logo: <IconBrandWhatsapp />,
+  //   connected: false,
+  //   desc: 'Easily integrate WhatsApp for direct messaging.',
+  // },
 ]

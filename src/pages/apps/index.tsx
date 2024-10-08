@@ -21,7 +21,7 @@ import { Button } from '@/components/custom/button'
 import { apps } from './data'
 
 const appText = new Map<string, string>([
-  ['all', 'All Apps'],
+  ['all', 'All Games'],
   ['connected', 'Connected'],
   ['notConnected', 'Not Connected'],
 ])
@@ -72,7 +72,7 @@ export default function Apps() {
         <div className='my-4 flex items-end justify-between sm:my-0 sm:items-center'>
           <div className='flex flex-col gap-4 sm:my-4 sm:flex-row'>
             <Input
-              placeholder='Filter apps...'
+              placeholder='Filter games...'
               className='h-9 w-40 lg:w-[250px]'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -82,7 +82,7 @@ export default function Apps() {
                 <SelectValue>{appText.get(appType)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='all'>All Apps</SelectItem>
+                <SelectItem value='all'>All Games</SelectItem>
                 <SelectItem value='connected'>Connected</SelectItem>
                 <SelectItem value='notConnected'>Not Connected</SelectItem>
               </SelectContent>
@@ -129,7 +129,7 @@ export default function Apps() {
                   size='sm'
                   className={`${app.connected ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
                 >
-                  {app.connected ? 'Connected' : 'Connect'}
+                  {app.connected ? 'Open' : 'Coming Soon.'}
                 </Button>
               </div>
               <div>
